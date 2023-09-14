@@ -158,12 +158,42 @@ write_binary:
 ret
 
 main:
-
+    mov eax, str_C
+    call mio_writestr
+    mov eax, str_ex
+    call mio_writestr
+    mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    mov eax, str_A
+    call mio_writestr
+    call read_hexadecimal
+    push eax
+    mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    mov eax, str_B
+    call mio_writestr
+    call read_hexadecimal
+    push eax
+    mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    pop ebx ;B
+    pop eax ;A
+    ;E03F FFFF - bitmasking, should solve it tomorrow
 
     ret
 
 section .data
 
     str_h_error_nan db 'Hiba! Nem hexadecimalis szam!', 0
+    str_A db 'A = ', 0
+    str_B db 'B = ', 0
+    str_C db 'C = ', 0
+    str_ex db 'A[11:8], B[3:0] OR B[7:4], A[15:8]', 0
 
 section .bss
