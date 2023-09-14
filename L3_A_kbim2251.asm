@@ -129,8 +129,8 @@ write_binary:
     mov edx, 4
 
     .process:
-    shl ebx, 1
     XOR eax, eax
+    shl ebx, 1
     adc eax, 0
     add eax, '0'
     call mio_writechar
@@ -158,15 +158,29 @@ write_binary:
 ret
 
 main:
+    mov eax, str_firsthex
+    call mio_writestr
+    XOR eax, eax
     call read_hexadecimal
     push eax
+    mov ebx, eax
+    mov eax, str_decimal
+    call mio_writestr
+    mov eax, ebx
     call write_binary
     mov eax, 13
     call mio_writechar
     mov eax, 10
     call mio_writechar
+    mov eax, str_secondhex
+    call mio_writestr
+    XOR eax, eax
     call read_hexadecimal
     push eax
+    mov ebx, eax
+    mov eax, str_decimal
+    call mio_writestr
+    mov eax, ebx
     call write_binary
     pop eax
     pop ebx
@@ -175,6 +189,8 @@ main:
     call mio_writechar
     mov eax, 10
     call mio_writechar
+    mov eax, str_sum
+    call mio_writestr
     mov eax, ebx
     call write_binary
 
@@ -183,6 +199,10 @@ ret
 
 section .data
 
+    str_firsthex db 'First hexadecimal number of yours: ', 0
+    str_secondhex db 'Second hexadecimal number of yours: ', 0
+    str_decimal db 'In decimal: ', 0
+    str_sum db 'The sum of them in decimal: ', 0
     str_h_error_nan db 'Hiba! Nem hexadecimalis szam.', 0
 
 section .bss
