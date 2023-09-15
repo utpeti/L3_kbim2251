@@ -199,44 +199,88 @@ main:
     push ebx
     push ecx ;stack: A, B, C
 
+    XOR edx, edx
     mov edx, 0xA0000000 ;101 solved
 
-    mov ecx, 0xFFF00001
-    XOR ecx, ebx
-    push ecx ;stack: A, B, C, ecx
-    mov ecx, 0x00001FFF
-    XOR ecx, ebx
+    push edx
+    XOR ecx, ecx
+    mov ecx, 0x000FFFFE
+    AND ecx, ebx
+    push ecx ;stack: A, B, C, edx
+    XOR ecx, ecx
+    mov ecx, 0xFFFFE000
+    AND ecx, ebx
     XOR ebx, ebx
-    pop ebx ;stack : A, B, C
+    pop eax ;stack : A, B, C
+    shl eax, 12
+    mov ebx, eax
     AND ebx, ecx
+    mov eax, ebx
+    shr eax, 3
+    XOR ebx, ebx
+    mov ebx, eax
+    pop edx
     add edx, ebx ;B[19:1] AND B[31:13] solved
+    mov eax, ebx
+    call write_binary
+     mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
 
-    mov ebx, 0x0000000E
+    mov ebx, 0x000000E0
     pop ecx ;C stack: A, B
     push ecx ; stack: A, B, C
-    mov eax, 0xFFFFFF0F
-    XOR ecx, eax
+    mov eax, 0x000000F0
+    AND ecx, eax
     XOR ecx, ebx
-    add edx, ecx ;1110 XOR C[7:4] solved
+    push edx
+    mov eax, ecx
+    mov ecx, 0x4
+    mul ecx
+    mov ecx, eax
+    add edx, ecx
+    pop edx ;1110 XOR C[7:4] solved
 
     pop ecx ;C stack: A, B
     push ecx ; stack: A, B, C
-    mov ebx, 0xFFFFFE0F
-    xor ecx, ebx
-    add edx, ecx ;C[11:7] solved
+    push edx
+    mov ebx, 0x000001F0
+    AND ecx, ebx
+    mov ebx, 0x40
+    mov eax, ecx
+    mul ebx
+    mov ecx, eax
+    add edx, ecx
+    pop edx ;C[11:7] solved
 
     pop ecx
     pop ebx
     pop eax ; stack:
     push ebx
     push eax
-    mov ebx, 0xFDFFFFFF
-    XOR eax, ebx
-    mov ebx, 0xFF7FFFFF
-    XOR ecx, ebx
-    AND eax, ecx ;A[25:25] AND C[23:23] solved
+    push edx
+    mov ebx, 0x02000000
+    AND eax, ebx
+    mov ebx, 0x2000000
+    cdq
+    div ebx
+    push eax
+    mov ebx, 0x00800000
+    AND ecx, ebx
+    mov ebx, 0x800000
+    mov eax, ecx
+    cdq
+    div ebx
+    pop ebx
+    AND eax, ebx
+    pop edx
+    add edx, eax ;A[25:25] AND C[23:23] solved
     
-    add edx, eax
     XOR eax, eax
     mov eax, str_A
     call mio_writestr
