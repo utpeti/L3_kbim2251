@@ -169,7 +169,7 @@ main:
     mov eax, str_A
     call mio_writestr
     call read_hexadecimal
-    push eax
+    push eax ; stack: A
     mov eax, 10
     call mio_writechar
     mov eax, 13
@@ -177,14 +177,94 @@ main:
     mov eax, str_B
     call mio_writestr
     call read_hexadecimal
-    push eax
+    push eax ; stack: A B
     mov eax, 10
     call mio_writechar
     mov eax, 13
     call mio_writechar
-    pop ebx ;B
-    pop eax ;A
-    ;E03F FFFF - bitmasking, should solve it tomorrow
+    pop ebx ;B, stack: A
+    mov eax, str_C
+    call mio_writestr
+    call read_hexadecimal
+    push eax ; stack: A, C
+    mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    push ebx ; stack: A, C, B
+    pop ebx ;B stack: A, C
+    pop ecx ;C stack: A
+    pop eax ;A stack:
+    push eax
+    push ebx
+    push ecx ;stack: A, B, C
+
+    mov edx, 0xA0000000 ;101 solved
+
+    mov ecx, 0xFFF00001
+    XOR ecx, ebx
+    push ecx ;stack: A, B, C, ecx
+    mov ecx, 0x00001FFF
+    XOR ecx, ebx
+    XOR ebx, ebx
+    pop ebx ;stack : A, B, C
+    AND ebx, ecx
+    add edx, ebx ;B[19:1] AND B[31:13] solved
+
+    mov ebx, 0x0000000E
+    pop ecx ;C stack: A, B
+    push ecx ; stack: A, B, C
+    mov eax, 0xFFFFFF0F
+    XOR ecx, eax
+    XOR ecx, ebx
+    add edx, ecx ;1110 XOR C[7:4] solved
+
+    pop ecx ;C stack: A, B
+    push ecx ; stack: A, B, C
+    mov ebx, 0xFFFFFE0F
+    xor ecx, ebx
+    add edx, ecx ;C[11:7] solved
+
+    pop ecx
+    pop ebx
+    pop eax ; stack:
+    push ebx
+    push eax
+    mov ebx, 0xFDFFFFFF
+    XOR eax, ebx
+    mov ebx, 0xFF7FFFFF
+    XOR ecx, ebx
+    AND eax, ecx ;A[25:25] AND C[23:23] solved
+    
+    add edx, eax
+    XOR eax, eax
+    mov eax, str_A
+    call mio_writestr
+    pop eax
+    call write_binary
+    mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    mov eax, str_B
+    call mio_writestr
+    pop eax
+    call write_binary
+    mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    mov eax, str_r
+    call mio_writestr
+    mov eax, 10
+    call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    mov eax, str_C
+    call mio_writestr
+    XOR eax, eax
+    mov eax, edx
+    call write_binary
 
     ret
 
@@ -194,6 +274,7 @@ section .data
     str_A db 'A = ', 0
     str_B db 'B = ', 0
     str_C db 'C = ', 0
-    str_ex db 'A[11:8], B[3:0] OR B[7:4], A[15:8]', 0
+    str_ex db '101, B[19:1] AND B[31:13], 1110 XOR C[7:4], C[11:7], A[25:25] AND C[23:23]', 0
+    str_r db '==>', 0
 
 section .bss
