@@ -202,36 +202,19 @@ main:
     XOR edx, edx
     mov edx, 0xA0000000 ;101 solved
 
-    push edx
     XOR ecx, ecx
     mov ecx, 0x000FFFFE
-    AND ecx, ebx
-    push ecx ;stack: A, B, C, edx
+    mov eax, ebx
+    AND ebx, ecx
+    shl ebx, 12
     XOR ecx, ecx
     mov ecx, 0xFFFFE000
-    AND ecx, ebx
-    XOR ebx, ebx
-    pop eax ;stack : A, B, C
-    shl eax, 12
-    mov ebx, eax
-    AND ebx, ecx
-    mov eax, ebx
+    AND eax, ecx
+    AND eax, ebx
     shr eax, 3
+    add edx, eax;B[19:1] AND B[31:13] solved
+    
     XOR ebx, ebx
-    mov ebx, eax
-    pop edx
-    add edx, ebx ;B[19:1] AND B[31:13] solved
-    mov eax, ebx
-    call write_binary
-     mov eax, 10
-    call mio_writechar
-    mov eax, 13
-    call mio_writechar
-    mov eax, 10
-    call mio_writechar
-    mov eax, 13
-    call mio_writechar
-
     mov ebx, 0x000000E0
     pop ecx ;C stack: A, B
     push ecx ; stack: A, B, C
@@ -240,23 +223,22 @@ main:
     XOR ecx, ebx
     push edx
     mov eax, ecx
-    mov ecx, 0x4
-    mul ecx
+    shl eax, 2
     mov ecx, eax
-    add edx, ecx
-    pop edx ;1110 XOR C[7:4] solved
+    pop edx
+    add edx, ecx ;1110 XOR C[7:4] solved
 
+    XOR ecx, ecx
     pop ecx ;C stack: A, B
     push ecx ; stack: A, B, C
     push edx
-    mov ebx, 0x000001F0
+    mov ebx, 0x00000F80
     AND ecx, ebx
-    mov ebx, 0x40
     mov eax, ecx
-    mul ebx
+    shr eax, 6
     mov ecx, eax
-    add edx, ecx
-    pop edx ;C[11:7] solved
+    pop edx
+    add edx, ecx ;C[11:7] solved
 
     pop ecx
     pop ebx
