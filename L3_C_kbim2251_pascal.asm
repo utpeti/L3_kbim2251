@@ -73,22 +73,32 @@ process_a: ;[ebx]
     XOR ecx, ecx
     XOR eax, eax
 
-    mov ecx, 1
+    mov cl, 0
+    mov dh, 0
+    jmp .letter
 
     .number:
     mov ah, 0
-    inc dl
     mov al, dl
     add al, '0'
+    inc dh
+    push ecx
+    mov cl, dh
     call construct_r_a
+    pop ecx
+    inc dl
     .letter:
     cmp ah, 3
     je .number
-    inc ecx
-    inc ah
+    inc cl
+    inc dh
     mov al, [ebx + ecx]
+    push ecx
+    mov cl, dh
     call construct_r_a
-    cmp ecx, [ebx]
+    pop ecx
+    inc ah
+    cmp cl, [ebx]
     jg .end
     jmp .letter
 
@@ -109,10 +119,103 @@ construct_r_a: ;[al, ecx]
     push ebx
     push ecx
     push edx
-
+    
     mov ebx, str_r
     mov [ebx + ecx], al
     
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    ret
+
+process_b:
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    XOR eax, eax
+    XOR ecx, ecx
+    XOR edx, edx
+
+    push ebx
+    mov ebx, str_r
+    mov ah, [ebx]
+    add ah, 1
+    XOR ebx, ebx
+    pop ebx
+    mov al, 'A'
+    jmp .ucase
+
+    .addu:
+    inc al
+    XOR ecx, ecx
+    cmp al, 'Z'
+    jg .lcaseprep
+
+    .ucase:
+    cmp cl, [ebx]
+    je .addu
+    inc cl
+    mov dl, [ebx + ecx]
+    cmp dl, '0'
+    jl .ucase
+    cmp dl, '9'
+    jg .ucase
+    inc cl
+    mov dl, [ebx + ecx]
+    cmp dl, al
+    je .addlett
+    jmp .ucase
+
+    .lcaseprep:
+
+    XOR eax, eax
+    XOR ecx, ecx
+    XOR edx, edx
+
+    mov al, 'a'
+    jmp .ucase
+
+    .addl:
+    inc al
+    XOR ecx, ecx
+    cmp al, 'z'
+    jg .end
+
+    .lcase:
+    cmp cl, [ebx]
+    je .addl
+    inc cl
+    mov dl, [ebx + ecx]
+    cmp dl, '0'
+    jl .lcase
+    cmp dl, '9'
+    jg .lcase
+    inc cl
+    mov dl, [ebx + ecx]
+    cmp dl, al
+    je .addlett
+    jmp .lcase
+
+    .addlett:
+    push ecx
+    mov cl, ah
+    call construct_r_a
+    inc ah
+    pop ecx
+    cmp al, 'Z'
+    jle .ucase
+    jmp .lcase
+
+    .end:
+
+    mov eax, str_r
+    add ah, [ebx]
+    mov [eax], ah
+
     pop edx
     pop ecx
     pop ebx
@@ -146,6 +249,8 @@ main:
 
     mov ebx, str_a
     call process_a
+    mov ebx, str_b
+    call process_b
 
 
     mov eax, str_in_r
