@@ -151,14 +151,20 @@ process_b:
 
     .addu:
     inc al
-    XOR ecx, ecx
+    mov cl, 0
     cmp al, 'Z'
     jg .lcaseprep
 
     .ucase:
     cmp cl, [ebx]
-    je .addu
+    jge .addu
+    cmp dl, '0'
+    jl .incu
+    cmp dl, '9'
+    jle .incskipu
+    .incu:
     inc cl
+    .incskipu:
     mov dl, [ebx + ecx]
     cmp dl, '0'
     jl .ucase
@@ -171,24 +177,30 @@ process_b:
     jmp .ucase
 
     .lcaseprep:
-
-    XOR eax, eax
     XOR ecx, ecx
     XOR edx, edx
 
     mov al, 'a'
-    jmp .ucase
+    jmp .lcase
 
     .addl:
     inc al
-    XOR ecx, ecx
+    mov cl, 0
     cmp al, 'z'
     jg .end
 
     .lcase:
+    cmp al, 'a'
+    jl .lcaseprep
     cmp cl, [ebx]
-    je .addl
+    jge .addl
+    cmp dl, '0'
+    jl .inc
+    cmp dl, '9'
+    jle .incskip
+    .inc:
     inc cl
+    .incskip:
     mov dl, [ebx + ecx]
     cmp dl, '0'
     jl .lcase
@@ -205,6 +217,14 @@ process_b:
     mov cl, ah
     call construct_r_a
     inc ah
+    push ebx
+    push edx
+    XOR edx, edx
+    mov dl, 1
+    mov ebx, str_r
+    add [ebx], dl
+    pop edx
+    pop ebx
     pop ecx
     cmp al, 'Z'
     jle .ucase
@@ -246,12 +266,15 @@ main:
     call mio_writechar
     mov eax, 10
     call mio_writechar
+    mov eax, 13
+    call mio_writechar
+    mov eax, 10
+    call mio_writechar
 
     mov ebx, str_a
     call process_a
     mov ebx, str_b
     call process_b
-
 
     mov eax, str_in_r
     call mio_writestr
