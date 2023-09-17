@@ -42,19 +42,19 @@ write_str_pascal:
     push ecx
     push edx
 
-    XOR     ecx, ecx
-    mov     ebx, eax
-    mov     cl, [ebx]
-    mov     edx, 1
+    XOR ecx, ecx
+    mov ebx, eax
+    mov cl, [ebx]
+    mov edx, 1
 
     .display:
-    XOR     eax, eax 
-    mov     al, [ebx + edx]
-    call    mio_writechar
-    inc     edx
-    loop    .display
+    XOR eax, eax 
+    mov al, [ebx + edx]
+    call mio_writechar
+    inc edx
+    loop .display
 
-    mov     eax, ebx
+    mov eax, ebx
 
     pop edx
     pop ecx
