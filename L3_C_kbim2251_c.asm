@@ -28,7 +28,7 @@ read_str_c:
 
     .end:
     inc ebx
-    mov al, '0'
+    mov al, 0
     mov [ecx + ebx], al
     mov eax, ecx
 
@@ -50,14 +50,83 @@ write_str_c:
     .display:
     XOR eax, eax 
     mov al, [ebx + edx]
-    cmp al, '0'
+    cmp al, 0
     je .end
     call mio_writechar
     inc edx
-    cmp al, '0'
+    cmp al, 0
     jne .display
 
     .end:
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    ret
+
+process_a: ;[ebx]
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    XOR edx, edx
+    XOR ecx, ecx
+    XOR eax, eax
+
+    mov cl, 0
+    mov dh, 0
+    jmp .letter
+
+    .number:
+    mov ah, 0
+    mov al, dl
+    add al, '0'
+    push ecx
+    mov cl, dh
+    call construct_r_a
+    inc dh
+    pop ecx
+    inc dl
+    .letter:
+    cmp ah, 3
+    je .number
+    mov al, [ebx + ecx]
+    inc cl
+    push ecx
+    mov cl, dh
+    call construct_r_a
+    inc dh
+    pop ecx
+    inc ah
+    cmp al, 0
+    je .end
+    jmp .letter
+
+    .end:
+    mov eax, str_r
+    mov cl, dh
+    add cl, 1
+    mov dh, 0
+    mov [eax + ecx], dh
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    ret
+
+construct_r_a: ;[al, ecx]
+    push eax
+    push ebx
+    push ecx
+    push edx
+    
+    mov ebx, str_r
+    mov [ebx + ecx], al
+    
     pop edx
     pop ecx
     pop ebx
@@ -95,8 +164,8 @@ main:
 
     mov ebx, str_a
     call process_a
-    mov ebx, str_b
-    call process_b
+    ;mov ebx, str_b
+    ;call process_b
 
     mov eax, str_in_r
     call mio_writestr
