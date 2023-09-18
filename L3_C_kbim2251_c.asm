@@ -134,6 +134,121 @@ construct_r_a: ;[al, ecx]
 
     ret
 
+process_b:
+    push eax
+    push ebx
+    push ecx
+    push edx
+
+    XOR eax, eax
+    XOR ecx, ecx
+    XOR edx, edx
+
+    mov dl, [ebx]
+    mov al, 'A'
+    jmp .ucase
+
+    .addu:
+    inc al
+    mov cl, 0
+    mov dl, [ebx]
+    cmp al, 'Z'
+    jg .lcaseprep
+
+    .ucase:
+    cmp dl, 0
+    je .addu
+    cmp dl, '0'
+    jl .incu
+    cmp dl, '9'
+    jle .incskipu
+    .incu:
+    inc cl
+    .incskipu:
+    mov dl, [ebx + ecx]
+    cmp dl, '0'
+    jl .ucase
+    cmp dl, '9'
+    jg .ucase
+    inc cl
+    mov dl, [ebx + ecx]
+    cmp dl, al
+    je .addlett
+    jmp .ucase
+
+    .lcaseprep:
+    XOR ecx, ecx
+    XOR edx, edx
+
+    mov al, 'a'
+    mov dl, [ebx]
+    jmp .lcase
+
+    .addl:
+    inc al
+    mov cl, 0
+    mov dl, [ebx]
+    cmp al, 'z'
+    jg .end
+
+    .lcase:
+    cmp al, 'a'
+    jl .lcaseprep
+    cmp dl, 0
+    je .addl
+    cmp dl, '0'
+    jl .inc
+    cmp dl, '9'
+    jle .incskip
+    .inc:
+    inc cl
+    .incskip:
+    mov dl, [ebx + ecx]
+    cmp dl, '0'
+    jl .lcase
+    cmp dl, '9'
+    jg .lcase
+    inc cl
+    mov dl, [ebx + ecx]
+    cmp dl, al
+    je .addlett
+    jmp .lcase
+
+    .addlett:
+
+    push ebx
+    push ecx
+    push eax
+    mov ebx, str_r
+    mov cl, 0
+    .count:
+    mov al, [ebx + ecx]
+    inc cl
+    cmp al, 0
+    jne .count
+    dec cl
+    pop eax
+    call construct_r_a
+    inc cl
+    push eax
+    mov al, 0
+    call construct_r_a
+    pop eax
+    pop ecx
+    pop ebx
+    cmp al, 'Z'
+    jle .ucase
+    jmp .lcase
+
+    .end:
+
+    pop edx
+    pop ecx
+    pop ebx
+    pop eax
+
+    ret
+
 main:
     mov eax, str_in_a
     call mio_writestr
@@ -164,8 +279,8 @@ main:
 
     mov ebx, str_a
     call process_a
-    ;mov ebx, str_b
-    ;call process_b
+    mov ebx, str_b
+    call process_b
 
     mov eax, str_in_r
     call mio_writestr
